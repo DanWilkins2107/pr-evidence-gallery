@@ -214,17 +214,20 @@ info (e.g. `gh pr view --json`) and passes it in.
 
 ## 12. Implementation outline (status)
 
+Code is built and committed; the remaining `Todo` rows are manual Firebase/GCP
+console actions documented step-by-step in [`docs/SETUP.md`](docs/SETUP.md).
+
 | Step | Status |
 |---|---|
-| Create Firebase project (Blaze), enable RTDB / Storage / Hosting / Auth | Todo |
-| Set $5 budget alert in GCP | Todo |
-| Create bot account + human accounts by hand | Todo |
-| `database.rules.json` (auth + validated shape) | Todo |
-| `storage.rules` (auth + size caps + type allowlist) | Todo |
-| Storage lifecycle rule (6-month TTL) | Todo |
-| Shared `encode/decode` segment helper | Todo |
-| CLI: `upload` + `clear` (client SDK, gitignored creds) | Todo |
-| Gallery: home page (PR list + delete + multi-select) | Todo |
-| Gallery: per-PR page (grid + lightbox + delete-all) | Todo |
-| Login page (email/password, no signup) | Todo |
-| Deploy Hosting | Todo |
+| Create Firebase project (Blaze), enable RTDB / Storage / Hosting / Auth | Todo — manual (see SETUP.md) |
+| Set $5 budget alert in GCP | Todo — manual (see SETUP.md) |
+| Create bot account + human accounts by hand | Todo — manual (see SETUP.md) |
+| `database.rules.json` (auth + validated shape) | Done |
+| `storage.rules` (auth + size caps + type allowlist) | Done |
+| Storage lifecycle rule (6-month TTL) | Todo — manual `gsutil` step (exact command in SETUP.md) |
+| Shared `encode/decode` segment helper | Done — `public/shared/pathCodec.js` (imported by both CLI and site) |
+| CLI: `upload` + `clear` (client SDK, gitignored creds) | Done — `cli/` |
+| Gallery: home page (PR list + delete + multi-select) | Done — `public/index.html` + `public/js/home.js` |
+| Gallery: per-PR page (grid + lightbox + delete-all) | Done — `public/pr.html` + `public/js/pr.js` + `public/js/lightbox.js` |
+| Login page (email/password, no signup) | Done — `public/login.html` + `public/js/login.js` |
+| Deploy Hosting | Todo — manual `npm run deploy` after config (see SETUP.md) |

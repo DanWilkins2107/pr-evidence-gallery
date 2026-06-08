@@ -1,0 +1,49 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // All artifacts live under prs/{owner}/{repo}/{number}/{fileName}
+    // Owner and repo segments are percent-encoded (see public/shared/pathCodec.js).
+    match /prs/{owner}/{repo}/{number}/{fileName} {
+
+      // Any authenticated user (bot or human) may read or delete any artifact.
+      allow read, delete: if request.auth != null;
+
+      // Write (upload) is permitted only when ALL three conditions hold:
+      //   1. The requester is authenticated.
+      //   2. The content type is in the strict allowlist.
+      //   3. The file size does not exceed the per-type cap.
+      //
+      // Size caps (mirrors CONTENT_TYPES in public/shared/pathCodec.js):
+      //   Images (png, jpeg, webp) : 10 MB = 10 * 1024 * 1024 bytes
+      //   Videos (mp4, webm)       : 50 MB = 50 * 1024 * 1024 bytes
+      //
+      // This is a hard server-side enforcement; the CLI also does a friendly
+      // pre-flight check before attempting the upload.
+      allow write: if request.auth != null
+                   && (
+                        // ── Images ───────────────────────────────────────────
+                        (
+                          (
+                            request.resource.contentType == 'image/png'  ||
+                            request.resource.contentType == 'image/jpeg' ||
+                            request.resource.contentType == 'image/webp'
+                          )
+                          && request.resource.size <= 10 * 1024 * 1024
+                        )
+                        ||
+                        // ── Videos ───────────────────────────────────────────
+                        (
+                          (
+                            request.resource.contentType == 'video/mp4'  ||
+                            request.resource.contentType == 'video/webm'
+                          )
+                          && request.resource.size <= 50 * 1024 * 1024
+                        )
+                        // Everything else is implicitly denied.
+                      );
+    }
+
+  }
+}

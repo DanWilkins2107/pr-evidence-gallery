@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Sign in — PR Evidence Gallery</title>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body class="login-page">
+
+  <main>
+    <div class="login-card" role="main">
+
+      <!-- Branding -->
+      <div class="login-card__logo" aria-hidden="false">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32" aria-hidden="true" focusable="false">
+          <path d="M4 5h3v2H4zm0 4h3v2H4zm0 4h3v2H4zM2 3v18h20V3H2zm18 16H4v-2h16v2zm0-4H8v-2h12v2zm0-4H8V9h12v2zm0-4H8V5h12v2z"/>
+        </svg>
+        <div>
+          <span class="login-card__logo-text">PR Evidence Gallery</span>
+          <span class="login-card__logo-sub">Private — authorised access only</span>
+        </div>
+      </div>
+
+      <!-- Sign-in form -->
+      <form id="login-form" novalidate aria-label="Sign in form">
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            autocomplete="email"
+            placeholder="you@example.com"
+            required
+            autofocus
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            autocomplete="current-password"
+            placeholder="••••••••"
+            required
+          >
+        </div>
+
+        <!-- Error area — hidden until there is an error -->
+        <div
+          id="error-msg"
+          class="alert alert--error"
+          role="alert"
+          aria-live="assertive"
+          hidden
+        ></div>
+
+        <button
+          type="submit"
+          id="submit-btn"
+          class="btn btn--primary login-card__submit"
+        >
+          Sign in
+        </button>
+
+      </form>
+
+      <p class="login-card__access-note">
+        Contact the owner for access.
+      </p>
+
+    </div>
+  </main>
+
+  <script type="module" src="./js/login.js"></script>
+</body>
+</html>

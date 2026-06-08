@@ -1,0 +1,48 @@
+{
+  "rules": {
+    "prs": {
+      // Any authenticated user (bot or human) may read or write anywhere under /prs.
+      // Delete is a write of null and is therefore covered by the write rule.
+      ".read": "auth != null",
+      ".write": "auth != null",
+
+      "$owner": {
+        "$repo": {
+          "$number": {
+            "$artifactId": {
+              // Validate that every artifact node has exactly the four required fields
+              // and no unknown fields. The $other catch-all below rejects anything extra.
+              ".validate": "newData.hasChildren(['title', 'contentType', 'storagePath', 'uploadedAt'])",
+
+              "title": {
+                // Must be a non-empty string.
+                ".validate": "newData.isString() && newData.val().length > 0"
+              },
+
+              "contentType": {
+                // Must be one of the five allowed MIME types (matches CONTENT_TYPES in pathCodec.js).
+                ".validate": "newData.isString() && (newData.val() === 'image/png' || newData.val() === 'image/jpeg' || newData.val() === 'image/webp' || newData.val() === 'video/mp4' || newData.val() === 'video/webm')"
+              },
+
+              "storagePath": {
+                // Must be a non-empty string pointing to the Cloud Storage object.
+                ".validate": "newData.isString() && newData.val().length > 0"
+              },
+
+              "uploadedAt": {
+                // Must be a number (Unix ms timestamp). Used for age display and TTL reasoning.
+                ".validate": "newData.isNumber()"
+              },
+
+              // Reject any field not listed above. This ensures nothing malformed lands in the
+              // database even if the CLI has a bug or sends unexpected extra properties.
+              "$other": {
+                ".validate": false
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
