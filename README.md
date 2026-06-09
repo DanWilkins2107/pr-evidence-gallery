@@ -47,6 +47,31 @@ To set it up:
 1. Copy `.env.example` → `.env` (repo root) and fill in the six `FIREBASE_*` values from the Firebase console (Project settings → Your apps → Web app config). This same `.env` also holds the CLI bot credentials (`BOT_*`, `GALLERY_BASE_URL`).
 2. Run `npm run config` to generate the file, or just run `npm run deploy` — the config is auto-generated before every deploy.
 
+## Agent skill
+
+This repo ships a local Claude Code plugin (`agent-plugin/`) that exposes a `pr-evidence` skill. The skill auto-detects the current branch's PR, drives the upload flow, and posts a single gallery link comment on the PR — all without you needing to run CLI commands manually.
+
+**To opt a repo in:**
+
+```powershell
+cd C:\projects\my-app    # the consuming repo
+pr-evidence init
+```
+
+This writes `.claude/settings.json` in that repo, pointing Claude Code at this repo's plugin via `extraKnownMarketplaces` + `enabledPlugins`. Nothing is copied into the consuming repo beyond that one settings file.
+
+**Invoke the skill** inside the consuming repo:
+
+```
+/pr-evidence:pr-evidence
+```
+
+The skill defers to the consuming repo's `CLAUDE.md` for the evidence policy (what to capture); it only handles the upload + PR comment steps.
+
+**Prerequisites:** `pr-evidence` on PATH (via `npm link` — see [cli/README.md](cli/README.md)) and `gh` authenticated.
+
+---
+
 ## Local deploy commands
 
 ```powershell

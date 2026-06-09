@@ -1,0 +1,13 @@
+{
+  "name": "pr-evidence-tools",
+  "owner": {
+    "name": "Dan Wilkins"
+  },
+  "plugins": [
+    {
+      "name": "pr-evidence",
+      "source": "./agent-plugin",
+      "description": "Upload screenshots/videos as evidence on a PR and share a private gallery link."
+    }
+  ]
+}

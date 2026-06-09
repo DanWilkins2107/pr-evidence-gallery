@@ -54,6 +54,22 @@ All commands assume you are in the project root.
 
 ---
 
+## E. Agent skill (optional, per repo)
+
+The `pr-evidence` Claude Code skill lets Claude auto-detect the PR and drive the upload + PR comment flow.
+
+- [ ] **Once (global):** `cd cli && npm link` — registers `pr-evidence` as a global command on PATH.
+      (If you already did this for normal CLI use, nothing extra is needed.)
+- [ ] **Per repo:** inside each repo you want the skill in:
+      ```powershell
+      cd C:\projects\my-app
+      pr-evidence init
+      ```
+      This writes `.claude/settings.json` pointing at this repo's plugin.
+      Invoke the skill as `/pr-evidence:pr-evidence`.
+
+---
+
 ### What's already done for you (no action needed)
 
 Code, security rules, the shared path codec, the CLI, the gallery site, the config generator,

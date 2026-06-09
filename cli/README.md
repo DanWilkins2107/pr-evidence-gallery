@@ -94,6 +94,53 @@ Use this before re-uploading a fresh set of evidence (re-review flow).
 node ./bin/pr-evidence.js clear --pr acme/my-app#123
 ```
 
+### Wire the Claude skill into a consuming repo
+
+```bash
+cd ~/projects/my-other-repo
+pr-evidence init
+```
+
+One-time per-repo setup. Writes (or merges into) `.claude/settings.json` in
+the current working directory, pointing Claude Code at this repo's local plugin.
+After running it, the skill is available in that repo as `/pr-evidence:pr-evidence`.
+
+**No Firebase config is needed for this command** — it is a pure filesystem
+operation and works even if `.env` is not set up.
+
+**Example — resulting `.claude/settings.json`:**
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "pr-evidence-tools": {
+      "source": {
+        "source": "directory",
+        "path": "/Users/you/ClaudePhotoVideoAssetsToPr"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "pr-evidence@pr-evidence-tools": true
+  }
+}
+```
+
+Running `init` twice is idempotent — it merges in the same values and preserves
+any other keys already in settings.json.
+
+**Invoking the skill:**
+
+```
+/pr-evidence:pr-evidence
+```
+
+or with an explicit PR number:
+
+```
+/pr-evidence:pr-evidence 42
+```
+
 ### Help
 
 ```bash
