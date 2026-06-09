@@ -65,8 +65,9 @@ In the Firebase console, enable each service:
    - Set a strong random password; save it somewhere safe.
 3. Create one or more **human reviewer accounts** the same way.
 
-> The bot account credentials (email + password) go into `cli/.env` (gitignored).
-> See `cli/.env.example` for the exact variable names.
+> The bot account credentials (email + password) go into the root `.env` (gitignored),
+> in the bot section. See `.env.example` for the exact variable names. They are filled in
+> step 5d below.
 
 ---
 
@@ -105,18 +106,25 @@ Or use the Firebase CLI:
 npx firebase use your-actual-project-id
 ```
 
-### 5d. Fill in the web app config (root `.env`)
+### 5d. Fill in the config (single root `.env`)
+
+One `.env` at the repo root holds **everything** — the web app config used by the
+gallery/deploy *and* the bot credentials used by the CLI — so the Firebase values are
+never duplicated.
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Open `.env` and fill in the six `FIREBASE_*` values from the Firebase console:
-**Project settings → Your apps → Web app config snippet.**
+Open `.env` and fill in:
 
-If you haven't added a Web app yet, click **Add app → Web**, register it, then copy the
-`firebaseConfig` values shown. These values are **not secrets** — security is enforced by
-Auth + Security Rules.
+- The six `FIREBASE_*` values from the Firebase console:
+  **Project settings → Your apps → Web app config snippet.** If you haven't added a Web app
+  yet, click **Add app → Web**, register it, then copy the `firebaseConfig` values shown.
+  These are **not secrets** — security is enforced by Auth + Security Rules.
+- `BOT_EMAIL` / `BOT_PASSWORD` — the bot account from step 4 (`BOT_PASSWORD` *is* a secret;
+  this is why `.env` is gitignored).
+- `GALLERY_BASE_URL` — your hosted gallery URL, e.g. `https://your-project.web.app`.
 
 `public/firebase-config.js` is auto-generated from `.env` before every deploy (see §8).
 You can also generate it manually at any time:
@@ -125,14 +133,7 @@ You can also generate it manually at any time:
 npm run config
 ```
 
-### 5e. Fill in the CLI bot credentials (`cli/.env`)
-
-```powershell
-Copy-Item cli/.env.example cli/.env
-```
-
-Open `cli/.env` and fill in the bot account email, password, and the same Firebase config
-values (the CLI uses the client SDK for uploads). See `cli/README.md` for details.
+The CLI reads this same root `.env` directly — no separate config file. See `cli/README.md`.
 
 ---
 

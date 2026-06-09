@@ -25,14 +25,16 @@ npm install
 
 ## Configure
 
-Copy `.env.example` to `.env` and fill in all values:
+The CLI reads the **root `.env`** (one shared file — the same one the website and
+deploy use), so the Firebase config is never duplicated. From the repo root:
 
 ```bash
 cp .env.example .env
-# then edit cli/.env
+# then edit .env  (repo root)
 ```
 
-Variables:
+Fill in all of the variables below. The `FIREBASE_*` values are shared with the
+website; the bot section (`BOT_*`, `GALLERY_BASE_URL`) is used only by this CLI.
 
 | Variable | Description |
 |---|---|

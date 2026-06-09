@@ -2,9 +2,10 @@
  * cli/src/config.js
  *
  * Loads runtime configuration from environment variables, with optional
- * loading from a local cli/.env file (gitignored). Validates that all
- * required variables are present and throws a friendly error listing any
- * that are missing.
+ * loading from the gitignored root .env file (the single source of truth
+ * shared with the website/deploy config). Validates that all required
+ * variables are present and throws a friendly error listing any that are
+ * missing.
  *
  * A tiny hand-rolled dotenv parser is used — no third-party dependency.
  */
@@ -15,8 +16,10 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// Path to the .env file sitting in cli/ (one level up from src/)
-const ENV_FILE_PATH = resolve(__dirname, '..', '.env');
+// Path to the shared root .env file (two levels up from cli/src/ → repo root).
+// The CLI reads the SAME .env as the website/deploy config so the Firebase
+// values are never duplicated.
+const ENV_FILE_PATH = resolve(__dirname, '..', '..', '.env');
 
 /**
  * Parses KEY=VALUE lines from a dotenv-format string.
@@ -56,7 +59,7 @@ function parseDotenv(text) {
 }
 
 /**
- * Attempts to read and parse cli/.env, then merges any keys that are NOT
+ * Attempts to read and parse the root .env, then merges any keys that are NOT
  * already present in process.env (process.env always wins so that CI/shell
  * env vars take precedence over the file).
  */
@@ -95,9 +98,9 @@ const REQUIRED_VARS = [
 /**
  * Loads and validates all required configuration.
  *
- * First tries to read cli/.env (silently ignored if absent), then reads
+ * First tries to read the root .env (silently ignored if absent), then reads
  * from process.env. Throws a friendly error listing any missing variables
- * and pointing to cli/.env.example.
+ * and pointing to .env.example.
  *
  * @returns {{
  *   firebaseConfig: {
@@ -121,7 +124,7 @@ export function loadConfig() {
     throw new Error(
       `Missing required configuration variables:\n` +
       missing.map((k) => `  • ${k}`).join('\n') +
-      `\n\nCopy cli/.env.example to cli/.env and fill in the values.`
+      `\n\nCopy .env.example to .env (repo root) and fill in the values.`
     );
   }
 

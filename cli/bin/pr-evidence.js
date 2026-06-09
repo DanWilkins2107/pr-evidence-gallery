@@ -61,7 +61,7 @@ GLOBAL FLAGS
 
 CONFIGURATION
 
-  Copy cli/.env.example to cli/.env and fill in:
+  Copy .env.example to .env (repo root) and fill in:
     FIREBASE_API_KEY, FIREBASE_AUTH_DOMAIN, FIREBASE_DATABASE_URL,
     FIREBASE_PROJECT_ID, FIREBASE_STORAGE_BUCKET, FIREBASE_APP_ID,
     BOT_EMAIL, BOT_PASSWORD, GALLERY_BASE_URL

@@ -32,10 +32,10 @@ All commands assume you are in the project root.
 - [ ] `npm install` — installs `firebase-tools` locally (no global install needed).
 - [ ] `npx firebase login`
 - [ ] Set the project ID: `npx firebase use YOUR_PROJECT_ID` (or edit `.firebaserc`).
-- [ ] Web config: `Copy-Item .env.example .env`, then fill the six `FIREBASE_*` values
-      from the Web app config (step A). *(Already gitignored.)*
-- [ ] CLI bot config: `Copy-Item cli/.env.example cli/.env`, then fill the bot email/password
-      + the same Firebase values. See [`cli/README.md`](cli/README.md). *(Already gitignored.)*
+- [ ] Config — **one** root `.env` for everything: `Copy-Item .env.example .env`, then fill:
+  - [ ] the six `FIREBASE_*` values from the Web app config (step A) — used by the site *and* the CLI
+  - [ ] `BOT_EMAIL` / `BOT_PASSWORD` (the bot account from step A) + `GALLERY_BASE_URL` — used by the CLI
+  - *(`.env` is already gitignored. See [`cli/README.md`](cli/README.md) for CLI detail.)*
 
 ## C. Deploy (from this repo)
 

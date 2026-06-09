@@ -15,13 +15,12 @@ pr-evidence-gallery/
 │   └── login.html          # Login page — email/password
 ├── cli/                    # Upload CLI tool — `upload` and `clear` commands
 │   ├── package.json
-│   ├── .env.example        # Template for cli/.env (bot credentials + Firebase config)
-│   └── ...
+│   └── ...                 # reads the shared root .env (no separate config file)
 ├── scripts/
 │   └── generate-firebase-config.mjs  # Generates public/firebase-config.js from root .env
 ├── docs/
 │   └── SETUP.md            # Step-by-step Firebase project setup checklist
-├── .env.example            # Template for root .env (web app Firebase config)
+├── .env.example            # Template for the single root .env (web config + CLI bot creds)
 ├── database.rules.json     # Firebase RTDB security rules
 ├── storage.rules           # Cloud Storage security rules
 ├── firebase.json           # Firebase project service config
@@ -45,7 +44,7 @@ Because both sides use the exact same file, RTDB paths written by the CLI and re
 It is produced from root `.env` by `scripts/generate-firebase-config.mjs` and is gitignored.
 
 To set it up:
-1. Copy `.env.example` → `.env` (repo root) and fill in the six `FIREBASE_*` values from the Firebase console (Project settings → Your apps → Web app config).
+1. Copy `.env.example` → `.env` (repo root) and fill in the six `FIREBASE_*` values from the Firebase console (Project settings → Your apps → Web app config). This same `.env` also holds the CLI bot credentials (`BOT_*`, `GALLERY_BASE_URL`).
 2. Run `npm run config` to generate the file, or just run `npm run deploy` — the config is auto-generated before every deploy.
 
 ## Local deploy commands
@@ -61,16 +60,13 @@ npx firebase login
 #    Edit .firebaserc  OR  run:
 npx firebase use your-project-id
 
-# 4. Fill in web config
-Copy-Item .env.example .env   # then edit .env with your Firebase values
+# 4. Fill in config — one root .env holds web config AND CLI bot credentials
+Copy-Item .env.example .env   # then edit .env (FIREBASE_*, BOT_*, GALLERY_BASE_URL)
 
-# 5. Fill in CLI bot credentials
-Copy-Item cli/.env.example cli/.env   # then edit cli/.env
-
-# 6. Deploy rules first (does not require .env to be filled)
+# 5. Deploy rules first (does not require .env to be filled)
 npm run deploy:rules
 
-# 7. Deploy everything (auto-generates public/firebase-config.js from .env first)
+# 6. Deploy everything (auto-generates public/firebase-config.js from .env first)
 npm run deploy
 ```
 
