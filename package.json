@@ -5,9 +5,16 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "config": "node scripts/generate-firebase-config.mjs",
+    "predeploy": "npm run config",
     "deploy": "firebase deploy",
+    "predeploy:hosting": "npm run config",
     "deploy:hosting": "firebase deploy --only hosting",
     "deploy:rules": "firebase deploy --only database,storage",
+    "preemulators": "npm run config",
     "emulators": "firebase emulators:start"
+  },
+  "devDependencies": {
+    "firebase-tools": "^13"
   }
 }

@@ -46,7 +46,7 @@ In the Firebase console, enable each service:
 
 ### 3c. Hosting
 1. Left nav → **Hosting** → **Get started**.
-2. You can skip the optional Firebase CLI setup steps shown in the wizard — the CLI agent handles that.
+2. You can skip the optional Firebase CLI setup steps shown in the wizard — the deploy commands below handle it.
 
 ### 3d. Authentication
 1. Left nav → **Authentication** → **Get started**.
@@ -66,14 +66,30 @@ In the Firebase console, enable each service:
 3. Create one or more **human reviewer accounts** the same way.
 
 > The bot account credentials (email + password) go into `cli/.env` (gitignored).
-> See `cli/.env.example` (created by the CLI agent) for the exact variable names.
+> See `cli/.env.example` for the exact variable names.
 
 ---
 
-## 5. Fill in project identifiers
+## 5. Local setup
 
-### 5a. `.firebaserc` — project alias
-Open `.firebaserc` and replace `REPLACE_WITH_FIREBASE_PROJECT_ID` with your actual project ID:
+### 5a. Install dependencies (installs firebase-tools locally)
+
+```powershell
+npm install
+```
+
+This installs `firebase-tools` as a local devDependency so `npm run deploy` works without
+a global install. No `npm install -g firebase-tools` required.
+
+### 5b. Log in to Firebase
+
+```powershell
+npx firebase login
+```
+
+### 5c. Set the project ID
+
+Edit `.firebaserc` and replace the placeholder with your actual project ID:
 
 ```json
 {
@@ -83,22 +99,66 @@ Open `.firebaserc` and replace `REPLACE_WITH_FIREBASE_PROJECT_ID` with your actu
 }
 ```
 
-### 5b. `public/firebase-config.js` — web app config
-1. In the Firebase console → **Project settings** → **Your apps** section.
-2. If you haven't added a Web app yet, click **Add app** → Web, give it a nickname (e.g. `gallery`), and register it.
-3. Copy each value from the displayed `firebaseConfig` object.
-4. Open `public/firebase-config.js` and replace every `REPLACE_ME` placeholder.
+Or use the Firebase CLI:
+
+```powershell
+npx firebase use your-actual-project-id
+```
+
+### 5d. Fill in the web app config (root `.env`)
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Open `.env` and fill in the six `FIREBASE_*` values from the Firebase console:
+**Project settings → Your apps → Web app config snippet.**
+
+If you haven't added a Web app yet, click **Add app → Web**, register it, then copy the
+`firebaseConfig` values shown. These values are **not secrets** — security is enforced by
+Auth + Security Rules.
+
+`public/firebase-config.js` is auto-generated from `.env` before every deploy (see §8).
+You can also generate it manually at any time:
+
+```powershell
+npm run config
+```
+
+### 5e. Fill in the CLI bot credentials (`cli/.env`)
+
+```powershell
+Copy-Item cli/.env.example cli/.env
+```
+
+Open `cli/.env` and fill in the bot account email, password, and the same Firebase config
+values (the CLI uses the client SDK for uploads). See `cli/README.md` for details.
 
 ---
 
-## 6. Set the Storage object-lifecycle rule (6-month TTL)
+## 6. Deploy Security Rules first
+
+```powershell
+npm run deploy:rules
+```
+
+This deploys `database.rules.json` (RTDB rules) and `storage.rules` (Cloud Storage rules).
+Verify in the Firebase console that the rules are live before running any uploads.
+
+> Note: `deploy:rules` does **not** run `npm run config` — it does not need the web config
+> and must work even if `.env` is not yet filled in.
+
+---
+
+## 7. Set the Storage object-lifecycle rule (6-month TTL)
 
 Cloud Storage lifecycle rules automatically delete blobs older than 180 days.
-This replaces the need for Cloud Functions.
+This handles the TTL requirement without Cloud Functions.
 
 ### Option A — gsutil (PowerShell)
 
-Install the [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) if you haven't already, then:
+Install the [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) if you haven't
+already, then run from the project root:
 
 ```powershell
 # Save the lifecycle policy to a temporary file
@@ -131,52 +191,28 @@ Remove-Item lifecycle-tmp.json
 
 ---
 
-## 7. Install Firebase CLI (if not already installed)
+## 8. Deploy
+
+`npm run deploy` auto-generates `public/firebase-config.js` from `.env` before deploying
+(via the `predeploy` npm hook calling `npm run config`).
 
 ```powershell
-npm install -g firebase-tools
-firebase login
-```
+# Deploy everything (rules + hosting) — also auto-runs npm run config first
+npm run deploy
 
----
-
-## 8. Deploy Security Rules
-
-```powershell
-npm run deploy:rules
-```
-
-This deploys `database.rules.json` (RTDB rules) and `storage.rules` (Cloud Storage rules).
-Verify in the Firebase console that the rules are live before running any uploads.
-
----
-
-## 9. Deploy Hosting
-
-```powershell
+# Deploy only hosting (also auto-runs npm run config first)
 npm run deploy:hosting
 ```
 
-This deploys the `public/` directory to Firebase Hosting.
-Your gallery will be live at `https://YOUR_PROJECT_ID.web.app`.
+After deploy, your gallery will be live at `https://YOUR_PROJECT_ID.web.app`.
 
 ---
 
-## 10. (Optional) Deploy everything at once
+## 9. Verify
 
-```powershell
-npm run deploy
-```
-
-Deploys database rules, storage rules, and hosting in one command.
-
----
-
-## 11. Set up the CLI bot credentials
-
-See `cli/.env.example` (created by the CLI agent) for the required environment variables.
-Copy it to `cli/.env` (gitignored) and fill in the bot account email, password,
-and Firebase config values.
+1. Open the Hosting URL: `https://YOUR_PROJECT_ID.web.app`.
+2. Sign in with one of the human reviewer accounts you created in step 4.
+3. Confirm the gallery loads and the home page is accessible.
 
 ---
 
@@ -184,7 +220,8 @@ and Firebase config values.
 
 | Command | What it does |
 |---|---|
-| `npm run deploy` | Deploy all services (rules + hosting) |
-| `npm run deploy:hosting` | Deploy only the Hosting files |
-| `npm run deploy:rules` | Deploy only RTDB + Storage rules |
-| `npm run emulators` | Start the Firebase local emulator suite |
+| `npm run config` | Generate `public/firebase-config.js` from root `.env` (runs automatically before deploy) |
+| `npm run deploy` | Generate config, then deploy all services (rules + hosting) |
+| `npm run deploy:hosting` | Generate config, then deploy only Hosting files |
+| `npm run deploy:rules` | Deploy only RTDB + Storage rules (no config generation) |
+| `npm run emulators` | Generate config, then start the Firebase local emulator suite |
