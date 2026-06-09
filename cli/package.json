@@ -1,0 +1,16 @@
+{
+  "name": "pr-evidence-cli",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "description": "CLI for uploading and managing PR evidence artifacts to the Private PR Evidence Gallery.",
+  "bin": {
+    "pr-evidence": "./bin/pr-evidence.js"
+  },
+  "scripts": {
+    "start": "node ./bin/pr-evidence.js"
+  },
+  "dependencies": {
+    "firebase": "^10.0.0"
+  }
+}

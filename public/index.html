@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>PR Evidence Gallery</title>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+
+  <!-- Sticky header -->
+  <header class="site-header" role="banner">
+    <div class="site-header__brand">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true" focusable="false">
+        <path d="M4 5h3v2H4zm0 4h3v2H4zm0 4h3v2H4zM2 3v18h20V3H2zm18 16H4v-2h16v2zm0-4H8v-2h12v2zm0-4H8V9h12v2zm0-4H8V5h12v2z"/>
+      </svg>
+      PR Evidence Gallery
+    </div>
+    <nav class="site-header__nav" aria-label="Account navigation">
+      <button
+        id="sign-out-btn"
+        class="btn btn--ghost"
+        type="button"
+        aria-label="Sign out"
+      >
+        Sign out
+      </button>
+    </nav>
+  </header>
+
+  <!-- Page body -->
+  <div class="page-wrap" role="main">
+
+    <!-- Hero / page title -->
+    <div class="home-hero">
+      <h1 class="home-hero__title">All PRs</h1>
+      <p class="home-hero__sub">Screenshot and video evidence attached to pull requests.</p>
+    </div>
+
+    <!-- Global error (hidden until needed) -->
+    <div
+      id="global-error"
+      class="alert alert--error"
+      role="alert"
+      aria-live="assertive"
+      hidden
+    ></div>
+
+    <!-- Delete operation status (hidden until in progress) -->
+    <div
+      id="delete-status"
+      class="alert alert--info"
+      role="status"
+      aria-live="polite"
+      hidden
+    ></div>
+
+    <!-- Loading state -->
+    <div id="loading-state" class="state-message" aria-live="polite">
+      <span class="spinner" aria-hidden="true"></span>
+      <p style="margin-top:12px">Loading PRs…</p>
+    </div>
+
+    <!-- Empty state (hidden until confirmed empty) -->
+    <div id="empty-state" class="state-message" hidden>
+      <p class="state-message__title">No evidence yet</p>
+      <p>Upload screenshots or videos via the CLI to see them here.</p>
+    </div>
+
+    <!-- PR list section (hidden until data loads) -->
+    <section id="pr-section" hidden aria-label="Pull requests with evidence">
+
+      <!-- Batch-delete toolbar -->
+      <div class="home-toolbar">
+        <p class="home-toolbar__hint" style="font-size:0.85rem;color:var(--color-text-muted)">
+          Check rows to select, then delete selected.
+        </p>
+        <div class="home-toolbar__actions">
+          <button
+            id="delete-selected-btn"
+            class="btn btn--danger"
+            type="button"
+            aria-label="Delete selected PRs"
+          >
+            Delete selected PRs
+          </button>
+        </div>
+      </div>
+
+      <!-- The list is populated by home.js -->
+      <ul id="pr-list" class="pr-list" aria-label="PR list"></ul>
+
+    </section>
+
+  </div><!-- /.page-wrap -->
+
+  <script type="module" src="./js/home.js"></script>
+</body>
+</html>

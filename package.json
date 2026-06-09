@@ -1,0 +1,20 @@
+{
+  "name": "pr-evidence-gallery",
+  "version": "0.1.0",
+  "description": "Private Firebase-hosted gallery for attaching screenshots and videos to GitHub pull requests.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "config": "node scripts/generate-firebase-config.mjs",
+    "predeploy": "npm run config",
+    "deploy": "firebase deploy",
+    "predeploy:hosting": "npm run config",
+    "deploy:hosting": "firebase deploy --only hosting",
+    "deploy:rules": "firebase deploy --only database,storage",
+    "preemulators": "npm run config",
+    "emulators": "firebase emulators:start"
+  },
+  "devDependencies": {
+    "firebase-tools": "^13"
+  }
+}

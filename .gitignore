@@ -2,6 +2,10 @@
 .env
 .env.*
 *.local
+# Re-include .example templates — these are safe to commit
+!.env.example
+!.env.*.example
+!*.env.example
 bot-credentials.json
 service-account*.json
 .firebase-bot-config.json
@@ -13,6 +17,9 @@ firestore-debug.log
 database-debug.log
 ui-debug.log
 *.cache
+
+# Generated files — do not commit; regenerated from root .env via `npm run config`
+public/firebase-config.js
 
 # Node
 node_modules/
