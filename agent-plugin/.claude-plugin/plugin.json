@@ -1,0 +1,8 @@
+{
+  "name": "pr-evidence",
+  "description": "Upload screenshots/videos as evidence on a PR and share a private gallery link.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Dan Wilkins"
+  }
+}

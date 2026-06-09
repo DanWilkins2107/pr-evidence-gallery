@@ -7,9 +7,13 @@
  * Commands:
  *   pr-evidence upload <file> --repo owner/name --pr N --title "..."
  *   pr-evidence clear --pr owner/name#N
+ *   pr-evidence init
  *   pr-evidence --help
  *
  * Uses Node's built-in node:util parseArgs — no third-party arg-parsing dep.
+ *
+ * IMPORTANT: `init` is dispatched BEFORE loadConfig()/initFirebase() because
+ * it is a pure filesystem operation that must work even when .env is absent.
  */
 
 import { parseArgs } from 'node:util';
@@ -20,6 +24,7 @@ import { initFirebase } from '../src/firebase.js';
 import { parseRepoArg } from '../src/validation.js';
 import { upload } from '../src/commands/upload.js';
 import { clear }  from '../src/commands/clear.js';
+import { init }   from '../src/commands/init.js';
 
 // ---------------------------------------------------------------------------
 // Usage text
@@ -55,18 +60,33 @@ COMMANDS
         --pr            Full PR spec in "owner/name#N" format
                         e.g. --pr acme/my-repo#42
 
+  init
+      One-time per-repo setup: wires the current repo to the pr-evidence
+      Claude Code skill by writing (or merging into) .claude/settings.json.
+      Run this once inside any repo where you want the /pr-evidence:pr-evidence
+      skill available. Requires no Firebase config — it is a local filesystem op.
+
+      After running init, invoke the skill in Claude Code as:
+        /pr-evidence:pr-evidence
+
 GLOBAL FLAGS
 
   --help, -h      Show this help text and exit.
 
 CONFIGURATION
 
-  Copy cli/.env.example to cli/.env and fill in:
+  Copy .env.example to .env (repo root) and fill in:
     FIREBASE_API_KEY, FIREBASE_AUTH_DOMAIN, FIREBASE_DATABASE_URL,
     FIREBASE_PROJECT_ID, FIREBASE_STORAGE_BUCKET, FIREBASE_APP_ID,
     BOT_EMAIL, BOT_PASSWORD, GALLERY_BASE_URL
 
+  (Not required for the init command.)
+
 EXAMPLES
+
+  # One-time setup: wire the Claude skill into another repo
+  cd ~/projects/my-app
+  pr-evidence init
 
   # Upload a single screenshot
   node ./bin/pr-evidence.js upload ./screenshots/home-desktop.png \\
@@ -183,6 +203,30 @@ function parseCliArgs() {
     };
   }
 
+  if (command === 'init') {
+    // No flags for init — just the bare command.
+    let parsed;
+    try {
+      parsed = parseArgs({
+        args: argv.slice(1),
+        options: {
+          help: { type: 'boolean', short: 'h' },
+        },
+        allowPositionals: false,
+        strict: true,
+      });
+    } catch (err) {
+      die(`Argument error: ${err.message}\n\nRun with --help for usage.`);
+    }
+
+    if (parsed.values.help) {
+      process.stdout.write(USAGE + '\n');
+      process.exit(0);
+    }
+
+    return { command: 'init' };
+  }
+
   // Unknown command
   die(`Unknown command: "${command}".\n\nRun with --help for usage.`);
 }
@@ -207,6 +251,21 @@ function die(message) {
 
 async function main() {
   const args = parseCliArgs();
+
+  // ------------------------------------------------------------------
+  // `init` is a pure filesystem operation — no Firebase config needed.
+  // Dispatch it immediately, before any config loading or auth.
+  // ------------------------------------------------------------------
+  if (args.command === 'init') {
+    try {
+      await init([], {});
+    } catch (err) {
+      die(err.message);
+    }
+    process.exit(0);
+  }
+
+  // For all other commands (upload, clear), load config and sign in.
 
   // Load config — friendly error if .env is missing/incomplete.
   let config;

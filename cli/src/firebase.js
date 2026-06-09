@@ -53,13 +53,13 @@ export async function initFirebase(config) {
     if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
       throw new Error(
         `Authentication failed: invalid bot credentials.\n` +
-        `Check BOT_EMAIL and BOT_PASSWORD in cli/.env.`
+        `Check BOT_EMAIL and BOT_PASSWORD in .env (repo root).`
       );
     }
     if (code === 'auth/network-request-failed') {
       throw new Error(
         `Authentication failed: network error.\n` +
-        `Check your internet connection and FIREBASE_AUTH_DOMAIN in cli/.env.`
+        `Check your internet connection and FIREBASE_AUTH_DOMAIN in .env (repo root).`
       );
     }
     // Re-throw with a generic friendly wrapper for unexpected codes.
