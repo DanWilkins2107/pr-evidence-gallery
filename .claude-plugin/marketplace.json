@@ -7,7 +7,7 @@
     {
       "name": "pr-evidence",
       "source": "./agent-plugin",
-      "description": "Upload screenshots/videos as evidence on a PR and share a private gallery link."
+      "description": "Upload screenshots/videos to a private gallery: PR evidence (pr-evidence) or robot run footage (robot-run-upload)."
     }
   ]
 }

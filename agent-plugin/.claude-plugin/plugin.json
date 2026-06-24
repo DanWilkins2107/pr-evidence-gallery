@@ -1,6 +1,6 @@
 {
   "name": "pr-evidence",
-  "description": "Upload screenshots/videos as evidence on a PR and share a private gallery link.",
+  "description": "Upload screenshots/videos to a private gallery: as evidence on a PR (pr-evidence) or as footage from a robot run (robot-run-upload).",
   "version": "1.0.0",
   "author": {
     "name": "Dan Wilkins"
