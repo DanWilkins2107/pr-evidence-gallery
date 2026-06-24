@@ -1,109 +1,118 @@
 # Robot Event Setup
 
-> **New here? Start with this section.** It walks you through standing up your own
-> copy from scratch so you can upload and review **robot run footage** (the rest of
-> this README describes the original PR-evidence use case the project grew out of —
-> the machinery is identical).
+> **New here? Start with this section.** It explains how to watch robot-run footage and
+> how the robot uploads it. (The rest of this README documents the original PR-evidence
+> use case the project grew out of — the machinery is identical.)
 
-## What you get
+## How it works — one shared backend
 
-A **private, login-only website** where you upload video (and image) footage from
-robot runs and watch it back. Footage is grouped as **`robot / batch # run-number`**,
-and each run gets its own review page. Nothing is ever public — viewers must sign in
-with an account you create by hand.
+There is **one** Firebase backend (the owner's), already deployed and live. You do **not**
+stand up your own — everyone shares the same private gallery. Footage is grouped as
+**`robot / batch # run-number`**, and each run gets its own review page. Nothing is ever
+public — every viewer signs in with an account the owner creates by hand.
 
-You drive uploads either with the `pr-evidence` command-line tool or, inside Claude
-Code, with the **`robot-run-upload` skill**.
+There are two roles, with very different setup:
 
-## Important: this repo is code only — everyone runs their own backend
+| Role | Who | What they need |
+|---|---|---|
+| **Viewer** | People reviewing runs | A login account (made for them) + the URL. **Nothing to install.** |
+| **Uploader** | The robot car (or the owner via Claude) | Node + the CLI + the shared config. Pushes footage. |
 
-Cloning this repository (even after it's public on GitHub) gives you the **source code
-only**. It does **not** connect you to anyone else's gallery, and it is **not** a
-ready-to-run install. Each person must:
+> The Firebase project, the deployed site, and the accounts are all managed by the owner
+> following **[docs/SETUP.md](docs/SETUP.md)**. Most people never touch that.
 
-1. **Create their own Firebase project** (free to start; needs the Blaze plan for Cloud Storage).
-2. **Create their own `.env`** with that project's config + a bot account password.
-   - `.env` and the generated `public/firebase-config.js` are **gitignored and never committed**,
-     so they are not in the repo. There are no shared credentials to inherit.
-3. **Deploy the website + rules** to their own Firebase project.
+## Viewers — zero install
 
-In other words: the *code* is shareable; the *gallery and its data are yours alone* and
-stay private behind Firebase Authentication.
+1. Ask the owner to create you an account (Firebase console → Authentication → Add user).
+2. Open the gallery URL (e.g. `https://YOUR_PROJECT_ID.web.app`) and sign in.
+3. Browse to a run and watch. Videos play in the lightbox with pinch-zoom/pan on mobile.
 
-## Install — step by step
+That's the whole setup. No clone, no `.env`, no CLI.
 
-> Prerequisites: **Node 22+**, a Google account, and (for the Claude skill) **Claude Code**.
-> Commands below are PowerShell, run from the repo root unless noted.
+## Uploader — the robot car
 
-### 1. Clone and install dependencies
+The robot records footage (`.mp4`/`.webm`) and uploads each clip with the `pr-evidence`
+CLI. It needs three things once: **Node 22+**, the **CLI**, and the **shared config**.
 
-```powershell
+### 1. Get the CLI onto the device
+
+```bash
 git clone https://github.com/DanWilkins2107/pr-evidence-gallery.git
-cd pr-evidence-gallery
-npm install          # root deps (includes firebase-tools — no global install needed)
-cd cli; npm install; cd ..   # CLI deps
+cd pr-evidence-gallery/cli
+npm install
+npm link            # puts `pr-evidence` on PATH (or call ./bin/pr-evidence.js directly)
 ```
 
-### 2. Stand up your Firebase backend
+### 2. Provide the shared config (the owner sends this privately)
 
-Follow **[docs/SETUP.md](docs/SETUP.md)** end to end. It is the authoritative checklist and covers:
+The CLI needs nine values: the six `FIREBASE_*`, the shared bot account
+`BOT_EMAIL` / `BOT_PASSWORD`, and `GALLERY_BASE_URL`. **The owner sends these to you
+privately** — they are never committed to the repo (`.env` is gitignored).
 
-- Creating the Firebase project on the **Blaze** plan + a budget alert (cost is typically cents/month).
-- Enabling **Realtime Database**, **Cloud Storage**, **Hosting**, and **Email/Password Authentication**.
-- Creating accounts **by hand** (there is no self-signup): one **bot account** for uploads,
-  plus one or more **reviewer accounts** for the people who will watch the footage.
-- Filling in the single root **`.env`** (`Copy-Item .env.example .env`, then edit) with the
-  six `FIREBASE_*` values, the bot `BOT_EMAIL` / `BOT_PASSWORD`, and `GALLERY_BASE_URL`.
-- Deploying rules (`npm run deploy:rules`), setting the 6-month storage TTL, and deploying
-  the site (`npm run deploy`).
+You can supply them **either** way — pick one:
 
-After this step your gallery is live at `https://YOUR_PROJECT_ID.web.app`.
+- **A `.env` file at the repo root** — simplest. Drop the file the owner sends you at
+  `pr-evidence-gallery/.env` (same format as [`.env.example`](.env.example)). Done.
+- **Real environment variables** — best for a headless robot. Set the nine vars in the
+  robot's environment (systemd unit, Docker, or shell profile). No file in the repo needed —
+  environment variables take precedence over any `.env`. For example, in a systemd unit:
 
-### 3. Put the upload CLI on your PATH
+  ```ini
+  [Service]
+  Environment=FIREBASE_API_KEY=...
+  Environment=FIREBASE_AUTH_DOMAIN=...
+  Environment=FIREBASE_DATABASE_URL=...
+  Environment=FIREBASE_PROJECT_ID=...
+  Environment=FIREBASE_STORAGE_BUCKET=...
+  Environment=FIREBASE_APP_ID=...
+  Environment=BOT_EMAIL=...
+  Environment=BOT_PASSWORD=...
+  Environment=GALLERY_BASE_URL=https://YOUR_PROJECT_ID.web.app
+  ```
 
-The `robot-run-upload` skill calls a `pr-evidence` command, so link it once:
+### 3. Upload a clip
+
+After each run the robot runs one command per clip (`--repo` holds `robot/batch`,
+`--pr` holds the run number):
+
+```bash
+pr-evidence upload ./runs/run3-onboard.mp4 \
+  --repo rover-1/warehouse-2026-06-24 \
+  --pr 3 \
+  --title "Aisle 4 traverse - onboard cam"
+```
+
+It prints the run's gallery URL, e.g.
+`https://YOUR_PROJECT_ID.web.app/pr/rover-1/warehouse-2026-06-24/3`. Viewers open that and
+sign in. To replace a run's footage, clear it first:
+`pr-evidence clear --pr "rover-1/warehouse-2026-06-24#3"`.
+
+## Owner — uploading manually via Claude Code
+
+If you (the owner) want to upload footage by hand from Claude Code instead of from the
+robot, wire the skill into whatever repo you work from:
 
 ```powershell
-cd cli
-npm link        # makes `pr-evidence` available globally
-cd ..
-pr-evidence --help   # verify it resolves
+cd C:\path\to\your-footage-repo
+pr-evidence init        # writes .claude/settings.json pointing at your local clone
 ```
 
-(You can skip `npm link` and call `node ./cli/bin/pr-evidence.js` directly, but the skill expects `pr-evidence` on PATH.)
-
-### 4. Enable the Claude Code skill in the repo where you keep footage
-
-```powershell
-cd C:\path\to\your-footage-repo   # any folder/repo you work from in Claude Code
-pr-evidence init
-```
-
-This writes `.claude/settings.json` pointing Claude Code at **your local clone** of this
-repo (by filesystem path). Nothing else is copied. Then, inside Claude Code:
+Then invoke it in Claude Code:
 
 ```
 /pr-evidence:robot-run-upload
 ```
 
 The skill asks for the **robot**, **batch**, and **run number**, uploads your footage, and
-prints the review URL.
+prints the review URL. (This needs the same shared config from step 2 above present locally.)
 
-## Upload footage without Claude (plain CLI)
+## Security note — the shared bot account
 
-The skill is just a wrapper. You can upload directly, repurposing the CLI's fields
-(`--repo` holds `robot/batch`, `--pr` holds the run number):
-
-```powershell
-pr-evidence upload ".\runs\rover1-run3.mp4" `
-  --repo rover-1/warehouse-2026-06-24 `
-  --pr 3 `
-  --title "Aisle 4 traverse – onboard cam"
-```
-
-It prints the run's gallery URL: `https://YOUR_PROJECT_ID.web.app/pr/rover-1/warehouse-2026-06-24/3`.
-Sign in there to review. To replace a run's footage, clear it first:
-`pr-evidence clear --pr "rover-1/warehouse-2026-06-24#3"`.
+Everyone who uploads shares **one** bot account. Anyone with that `BOT_PASSWORD` can upload
+and delete footage, so only put it where you trust the device/person (the robot, your own
+machine). To revoke access you rotate the bot password in the Firebase console and re-issue
+it — there is no per-uploader credential. Viewer accounts are separate and can be disabled
+individually.
 
 ## Field mapping & limits at a glance
 
