@@ -200,6 +200,21 @@ This writes `.claude/settings.json` in that repo, pointing Claude Code at this r
 
 The skill defers to the consuming repo's `CLAUDE.md` for the evidence policy (what to capture); it only handles the upload + PR comment steps.
 
+### Before every UI PR
+
+The plugin also ships a `ui-pr-evidence` skill that holds the capture policy itself, so
+you don't have to restate it in each repo's `CLAUDE.md`:
+
+```
+/pr-evidence:ui-pr-evidence
+```
+
+It checks whether the PR actually touches UI code (skipping CLI, CI, DB and docs PRs),
+captures every changed view at desktop 1280px and mobile 375px plus a screen recording
+for multi-step flows, then hands off to `pr-evidence` for the upload and PR comment.
+Captures are ad-hoc (`npx playwright`) and nothing is committed. A consuming repo's own
+`CLAUDE.md` evidence policy, if present, overrides these defaults.
+
 **Prerequisites:** `pr-evidence` on PATH (via `npm link` — see [cli/README.md](cli/README.md)) and `gh` authenticated.
 
 ---
