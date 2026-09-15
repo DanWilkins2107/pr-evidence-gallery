@@ -122,8 +122,9 @@ Written: ${settingsPath}
 
   • Plugin enabled: pr-evidence@pr-evidence-tools
 
-Invoke the skill inside this repo as:
-  /pr-evidence:pr-evidence
+The skills trigger automatically when Claude opens or updates a UI PR.
+To run by hand inside this repo:
+  /pr-evidence:ui-pr-evidence
 
 Note: the first time you open/trust this workspace in Claude Code, you may be
 prompted once to allow the local plugin — this is expected.

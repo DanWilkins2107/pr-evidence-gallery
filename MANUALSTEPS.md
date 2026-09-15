@@ -56,7 +56,7 @@ All commands assume you are in the project root.
 
 ## E. Agent skill (optional, per repo)
 
-The `pr-evidence` Claude Code skill lets Claude auto-detect the PR and drive the upload + PR comment flow.
+The plugin's skills let Claude capture UI evidence and attach it to PRs on its own — no prompting needed.
 
 - [ ] **Once (global):** `cd cli && npm link` — registers `pr-evidence` as a global command on PATH.
       (If you already did this for normal CLI use, nothing extra is needed.)
@@ -66,7 +66,7 @@ The `pr-evidence` Claude Code skill lets Claude auto-detect the PR and drive the
       pr-evidence init
       ```
       This writes `.claude/settings.json` pointing at this repo's plugin.
-      Invoke the skill as `/pr-evidence:pr-evidence`.
+      The skills trigger automatically on UI PRs; to run by hand: `/pr-evidence:ui-pr-evidence`.
 
 ---
 

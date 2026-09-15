@@ -11,7 +11,7 @@ allowed-tools: Bash, PowerShell
 - **`pr-evidence` CLI** must be on PATH (installed globally via `npm link` from the gallery repo).
 - **`gh` CLI** must be authenticated (`gh auth status` should show the active account).
 
-If either is missing, stop and tell the user before proceeding.
+If either is missing, stop and include that in your final report — don't block waiting for help.
 
 ---
 
@@ -31,26 +31,23 @@ gh pr view --json number -q .number
 
 If a `[pr-number]` argument was provided, use it as the PR number instead of auto-detecting.
 
-If there is no open PR for the current branch, **stop and tell the user** to open a PR first. The gallery is keyed on a PR — uploading without one is not possible.
+If there is no open PR for the current branch, **stop** — the gallery is keyed on a PR, so uploading without one is not possible. Run this again once the PR is open.
 
 Assign the results to:
 - `$repo` — e.g. `acme/my-app`
 - `$prNumber` — e.g. `42`
 
-### 2. Determine what to capture
+### 2. Make sure you have captures
 
-Check the consuming repo's `CLAUDE.md` for an "evidence", "screenshots", or "visual evidence" section that describes what to capture (which views, viewports, scenarios).
+Normally the captured files come from `ui-pr-evidence`, which holds the capture policy. If you arrived here without captures, run `ui-pr-evidence` first — or, if the repo's `CLAUDE.md` has its own "evidence" / "screenshots" policy, capture what that describes.
 
-- If an evidence policy is found, follow it.
-- If none is found, use your judgment about what is obviously relevant to the change (e.g. the page or UI component that was modified). You may ask the user what they want captured if the change scope is unclear.
+Captures should be local temp files outside the repo. Common titles to aim for: `"<Page> – desktop 1280px"`, `"<Page> – mobile 375px"`, `"<Scenario> walkthrough"`.
 
-Capture the required screenshots or screen recordings and save them as local temp files. The exact capture toolchain is not prescribed here — use whatever screenshot or recording capability is available. Common titles to aim for: `"<Page> – desktop 1280px"`, `"<Page> – mobile 375px"`, `"<Scenario> walkthrough"`.
-
-**This skill is only about getting captured files into the gallery.** The evidence policy lives in the consuming repo's `CLAUDE.md`, not here.
+**This skill is only about getting captured files into the gallery.**
 
 ### 3. Handle re-review (fresh batch)
 
-If you are uploading a **fresh batch** to replace a previous set (e.g. the user said "re-upload" or evidence already exists for this PR), first clear the previous batch:
+If you are uploading a **fresh batch** to replace a previous set (e.g. you pushed new UI commits to a PR that already has evidence), first clear the previous batch:
 
 ```powershell
 pr-evidence clear --pr "$repo#$prNumber"
@@ -89,9 +86,9 @@ If `$env:CLAUDE_PLUGIN_ROOT` is not set, use the path relative to this skill fil
 
 The script prints either `"Posted gallery comment"` or `"Updated gallery comment"`.
 
-### 6. Report to the user
+### 6. Report
 
-Tell the user:
+Include in your final report:
 - The gallery URL for the PR.
 - How many artifacts were uploaded and their titles.
 - That the PR comment has been posted/updated with the link.

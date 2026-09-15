@@ -7,15 +7,27 @@ allowed-tools: Bash, PowerShell
 
 ## When this applies
 
-Applies only to PRs that touch UI code (in AgentAssembly: `web/`). **Skip it for CLI,
-CI, DB and docs PRs** — check the diff first:
+Applies only to PRs that change UI code. **Skip it for back-end, CLI, CI, DB and docs
+PRs** — check the diff against the PR's base branch first:
 
 ```powershell
-git diff --name-only origin/main...HEAD
+$base = gh pr view --json baseRefName -q .baseRefName
+git fetch origin $base
+git diff --name-only "origin/$base...HEAD"
 ```
 
-If nothing under the UI path changed, say so and stop. Don't capture evidence for a
-back-end-only PR.
+Decide what counts as UI from the repo itself, not from a fixed path:
+
+- The repo's `CLAUDE.md` (or `AGENTS.md`) may name its front-end directories — use that
+  if present.
+- Otherwise, treat as UI anything that changes what a user sees in a browser: components
+  and pages (`.tsx`, `.jsx`, `.vue`, `.svelte`, `.astro`), templates (`.html`, `.hbs`,
+  `.erb`, `.cshtml`, …), styles (`.css`, `.scss`, `.less`), and static front-end assets —
+  wherever they live in the repo.
+- Test files, stories, type-only changes and config do not count on their own.
+
+If no UI files changed, say so in one line and stop. Don't capture evidence for a
+PR with no visible change.
 
 ## What to capture
 
@@ -27,25 +39,30 @@ Capture ad-hoc with `npx playwright`; **commit nothing** — no test files, no
 screenshots, no `playwright.config` left behind in the diff. Write captures to a temp
 directory outside the repo.
 
-If the consuming repo's `CLAUDE.md` has its own evidence policy, that policy wins over
-the defaults above.
+If the repo's `CLAUDE.md` has its own evidence policy, that policy wins over the
+defaults above.
 
 ## Procedure
 
 1. **Check scope.** Diff against the base branch (above). UI files changed → continue.
-2. **List the changed views.** Map the changed files to the pages/components a
-   reviewer would need to see. If the mapping is unclear, ask the user which views
-   matter rather than guessing broadly.
-3. **Capture.** For each view, take the two viewport screenshots; for each multi-step
+2. **Run the app.** Start the front end the way the repo documents it (README,
+   `package.json` scripts, `CLAUDE.md`). Seed or mock whatever data the changed views
+   need to render meaningfully.
+3. **List the changed views.** Map the changed files to the pages/components a
+   reviewer would need to see. If a changed component is shared, capture the page(s)
+   where the change is most visible rather than every page that uses it.
+4. **Capture.** For each view, take the two viewport screenshots; for each multi-step
    flow, record a video. Save to a temp path. Name each capture so the title is
    obvious: `<Page> – desktop 1280px`, `<Page> – mobile 375px`, `<Scenario> walkthrough`.
-4. **Upload.** Hand off to the `pr-evidence` skill (`/pr-evidence:pr-evidence`) with the
+5. **Upload.** Hand off to the `pr-evidence` skill (`/pr-evidence:pr-evidence`) with the
    captured files — it detects the PR, uploads each artifact, and posts/updates the
    single gallery comment on the PR.
-5. **Confirm the diff is clean.** `git status --short` should show no new capture
-   artifacts or Playwright scaffolding.
+6. **Clean up.** Stop any dev server you started. `git status --short` should show no
+   new capture artifacts or Playwright scaffolding.
 
-## If the tooling is missing
+## If evidence can't be captured
 
-If the `pr-evidence` CLI is not on PATH, or `gh` is not authenticated, **say so on the
-PR** (as a comment) rather than silently dropping the evidence — and tell the user.
+If the app won't run, the `pr-evidence` CLI is not on PATH, or `gh` is not
+authenticated, **don't silently drop the evidence and don't block waiting for help**.
+Post a PR comment explaining what was skipped and why (if `gh` works), and include it
+in your final report.

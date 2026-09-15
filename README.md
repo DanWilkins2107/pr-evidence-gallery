@@ -49,7 +49,10 @@ To set it up:
 
 ## Agent skill
 
-This repo ships a local Claude Code plugin (`agent-plugin/`) that exposes a `pr-evidence` skill. The skill auto-detects the current branch's PR, drives the upload flow, and posts a single gallery link comment on the PR — all without you needing to run CLI commands manually.
+This repo ships a local Claude Code plugin (`agent-plugin/`) with two skills, written for autonomous development — the agent invokes them itself, nobody has to ask:
+
+- **`ui-pr-evidence`** — triggers when the agent opens, pushes to, or readies a PR that changes UI code. Holds the capture policy.
+- **`pr-evidence`** — the upload step: auto-detects the current branch's PR, uploads the captures, and posts a single gallery link comment on the PR.
 
 **To opt a repo in:**
 
@@ -60,24 +63,17 @@ pr-evidence init
 
 This writes `.claude/settings.json` in that repo, pointing Claude Code at this repo's plugin via `extraKnownMarketplaces` + `enabledPlugins`. Nothing is copied into the consuming repo beyond that one settings file.
 
-**Invoke the skill** inside the consuming repo:
+### UI PR capture policy
 
-```
-/pr-evidence:pr-evidence
-```
-
-The skill defers to the consuming repo's `CLAUDE.md` for the evidence policy (what to capture); it only handles the upload + PR comment steps.
-
-### Before every UI PR
-
-The plugin also ships a `ui-pr-evidence` skill that holds the capture policy itself, so
-you don't have to restate it in each repo's `CLAUDE.md`:
+`ui-pr-evidence` holds the capture policy itself, so you don't have to restate it in each
+repo's `CLAUDE.md`. You can also run it by hand:
 
 ```
 /pr-evidence:ui-pr-evidence
 ```
 
-It checks whether the PR actually touches UI code (skipping CLI, CI, DB and docs PRs),
+It checks whether the PR actually touches UI code (inferred from the repo — no fixed
+directory; skipping back-end, CLI, CI, DB and docs PRs),
 captures every changed view at desktop 1280px and mobile 375px plus a screen recording
 for multi-step flows, then hands off to `pr-evidence` for the upload and PR comment.
 Captures are ad-hoc (`npx playwright`) and nothing is committed. A consuming repo's own
