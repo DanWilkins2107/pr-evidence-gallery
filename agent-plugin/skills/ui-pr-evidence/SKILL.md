@@ -1,6 +1,6 @@
 ---
 name: ui-pr-evidence
-description: "Use before opening or requesting review on a PR that changes UI — captures every changed view at desktop 1280px and mobile 375px (plus a screen recording for multi-step flows) and uploads them to the PR gallery. Trigger on 'before every UI PR', 'capture evidence for this PR', or when a PR touching front-end code is about to be reviewed."
+description: "Attach visual evidence to a pull request that changes UI. Use proactively, as part of your own workflow and without waiting to be asked: whenever you open a PR (e.g. right after `gh pr create`), push new commits to an open PR, or mark a PR ready for review, and the branch changes front-end code (pages, components, styles, templates). Captures every changed view at desktop 1280px and mobile 375px, plus a screen recording for multi-step flows, and uploads them to the PR gallery. A PR with UI changes is not finished until this has run. Skip for PRs with no UI changes."
 shell: powershell
 allowed-tools: Bash, PowerShell
 ---

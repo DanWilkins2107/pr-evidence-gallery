@@ -1,6 +1,6 @@
 ---
 name: pr-evidence
-description: "Use when the user wants to attach visual evidence (screenshots or screen recordings) to the current GitHub PR and share a private gallery link, e.g. after implementing a UI change or before requesting review."
+description: "Upload already-captured screenshots or screen recordings to the current branch's PR gallery and post (or update) the single gallery-link comment on the PR. Use whenever you have visual evidence files for a PR, typically as the final step of ui-pr-evidence, or when a PR's evidence must be re-uploaded after new changes. To decide what to capture for a UI change, run ui-pr-evidence instead."
 argument-hint: "[pr-number]"
 shell: powershell
 allowed-tools: Bash, PowerShell

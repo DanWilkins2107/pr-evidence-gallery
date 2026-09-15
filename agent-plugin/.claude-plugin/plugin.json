@@ -1,6 +1,6 @@
 {
   "name": "pr-evidence",
-  "description": "Capture and upload screenshots/videos to a private gallery: UI PR capture policy (ui-pr-evidence), PR evidence upload (pr-evidence), or robot run footage (robot-run-upload).",
+  "description": "Automatically capture screenshots/videos for UI pull requests and attach them via a private gallery link: capture policy (ui-pr-evidence) and upload + PR comment (pr-evidence).",
   "version": "1.0.0",
   "author": {
     "name": "Dan Wilkins"
